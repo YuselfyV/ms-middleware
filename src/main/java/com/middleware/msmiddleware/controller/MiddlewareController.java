@@ -4,6 +4,7 @@ import static com.libertadores.pensiones.utils.Constantes.DELETE_DATA;
 import static com.libertadores.pensiones.utils.Constantes.SAVE_DATA;
 import static com.libertadores.pensiones.utils.Constantes.UPDATE_DATA;
 
+import java.util.Date;
 import java.util.List;
 
 import com.middleware.msmiddleware.configuration.KafkaProducer;
@@ -42,28 +43,32 @@ public class MiddlewareController {
 
     @GetMapping(value = "/empleado/general", produces = { MediaType.APPLICATION_JSON_VALUE })
     public List<MiddlewareResponse> getEmpleado() {
+        Date sysdate = new Date();
         List<MiddlewareResponse> response=  this.service.getEmpleado();
-        kafkaProducer.enviarPeticion("Obteniendo datos del empleado: " + response);
+        kafkaProducer.enviarPeticion("Obteniendo datos del empleado: " + response +  " Fecha de la transaccion: " + sysdate);
         return response;
     }
 
     @PostMapping(value = "/empleado", produces = { MediaType.APPLICATION_JSON_VALUE }, consumes = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Response<MiddlewareResponse>> saveEmpleado(@RequestBody MiddlewareRequest entity) {
+        Date sysdate = new Date();
         MiddlewareResponse response = service.saveEmpleado(entity);
-        kafkaProducer.enviarPeticion("Creando datos del empleado: " + response );
+        kafkaProducer.enviarPeticion("Creando datos del empleado: " + response + " Fecha de la transaccion: " + sysdate);
         return new ResponseEntity<>(new Response<>(response, SAVE_DATA), HttpStatus.OK);
     }
 
     @PutMapping(value = "/empleado", produces = { MediaType.APPLICATION_JSON_VALUE }, consumes = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Response<MiddlewareResponse>> updateEmpleado(@RequestBody MiddlewareRequest entity) {
+        Date sysdate = new Date();
         MiddlewareResponse response = service.updateEmpleado(entity);
-        kafkaProducer.enviarPeticion("Actualizando datos del empleado: " + response );
+        kafkaProducer.enviarPeticion("Actualizando datos del empleado: " + response + " Fecha de la transaccion: " + sysdate );
         return new ResponseEntity<>(new Response<>(response, UPDATE_DATA), HttpStatus.OK);
     }
 
     @DeleteMapping(value = "/empleado/{id}")
     public ResponseEntity<Response<MiddlewareResponse>> deleteEmpleado(@Validated @PathVariable Integer id) {
-        kafkaProducer.enviarPeticion("Se va a eliminar empleado con id: " + id );
+        Date sysdate = new Date();
+        kafkaProducer.enviarPeticion("Se va a eliminar empleado con id: " + id + " Fecha de la transaccion: " +sysdate );
         service.deleteEmpleadoID(id);
         return new ResponseEntity<>(new Response<>(null, DELETE_DATA), HttpStatus.OK);
     }
